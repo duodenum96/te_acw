@@ -4,7 +4,7 @@ clear, clc, close all
 % For replicability. This number was chosen after extremely careful 
 % considerations which have nothing to do with so-called "shits and giggles".
 rng(666)
-projectfolder = '/BICNAS2/ycatal/te_acw';
+projectfolder = '/BICNAS2/ycatal/te_acw/modeling';
 cd(projectfolder)
 addpath(genpath(projectfolder))
 
