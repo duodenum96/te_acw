@@ -23,7 +23,7 @@ cfgx.toilim = [0 2];
 
 qmax = 20;
 
-for i = 67:nsubj
+for i = 1:nsubj
     isubj = subjs(i, :);
     try
         tic
