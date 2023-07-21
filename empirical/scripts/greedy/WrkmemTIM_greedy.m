@@ -35,40 +35,34 @@ for i = 1:nsubj
             cd(savefolder)
         end
 
-        for j = 1:nscan
-            roidata = load([isubj, '_MEG_', scans{j}, '-', task, '_', loadext, '_glasser.mat']);
-            roidata = ft_redefinetrial(cfgx, roidata.roidata);
-            ntrials = length(roidata.trial);
-            ntime = size(roidata.trial{1}, 2);
-            datamatrix = zeros(nroi, ntime, ntrials);
+            roidata = load([isubj, '_MEG-', task, '_', taskext, '_erf.mat']);
+            roidata = roidata.avgroidata;
+            ntime = length(roidata.time);
+            datamatrix = roidata.avg;
+            datamatrix([1 182], :) = [];
 
-            for k = 1:ntrials
-                tmp = roidata.trial{k};
-                tmp([1 182], :) = [];
-                datamatrix(:, :, k) = tmp(selected, :);
-            end
+            datamatrix = datamatrix(selected, :);
             
-            q_xx = zeros(nroi, nroi, ntrials);
-            q_xy = zeros(nroi, nroi, ntrials);
-            q_yx = zeros(nroi, nroi, ntrials);
-            q_yy = zeros(nroi, nroi, ntrials);
+            q_xx = zeros(nroi, nroi);
+            q_xy = zeros(nroi, nroi);
+            q_yx = zeros(nroi, nroi);
+            q_yy = zeros(nroi, nroi);
+
 	    disp(['Starting greedy for subject ', num2str(i), ...
                                 ' scan ', scans{j}])
 	    tic            
-            for k = 1:ntrials
-                for p = 1:nroi
-                    for q = p:nroi
-                        if p == q
-                            q_xx(p, q, k) = 1; q_xy(p, q, k) = 1; 
-                            q_yx(p, q, k) = 1; q_yy(p, q, k) = 1;
-                        else
-                            x = datamatrix(p, :, k);
-                            y = datamatrix(q, :, k);
-                            [q_xx(p, q, k), q_xy(p, q, k), q_yx(p, q, k), q_yy(p, q, k)] = greedy(x, y, qmax);
-                        end
-                    end
+        for p = 1:nroi
+            for q = p:nroi
+                if p == q
+                    q_xx(p, q) = 1; q_xy(p, q) = 1; 
+                    q_yx(p, q) = 1; q_yy(p, q) = 1;
+                else
+                    x = datamatrix(p, :);
+                    y = datamatrix(q, :);
+                    [q_xx(p, q), q_xy(p, q), q_yx(p, q), q_yy(p, q)] = greedy(x, y, qmax);
                 end
             end
+        end
 	    toc
             savefile = [isubj, '_MEG', '-', task, '_', scans{j}, '_', taskext, '_qs.mat'];
             save(savefile, 'datamatrix', 'q_xx', 'q_xy', 'q_yx', 'q_yy')
